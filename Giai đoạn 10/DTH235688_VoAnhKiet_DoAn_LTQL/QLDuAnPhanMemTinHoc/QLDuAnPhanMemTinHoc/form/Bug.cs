@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -9,7 +9,7 @@ namespace QLDuAnPhanMemTinHoc.form
 {
     public partial class Bug : Form
     {
-        private string strKetNoi = @"Server=.\SQLEXPRESS;Database=QLDA;Integrated Security=True;TrustServerCertificate=True";
+        private string strKetNoi = System.Configuration.ConfigurationManager.ConnectionStrings["QLDAConnection"].ConnectionString;
         private int maNhanVienDangNhap;
         private int maBugDangChon = -1;
 
@@ -130,6 +130,11 @@ namespace QLDuAnPhanMemTinHoc.form
                 ReadOnly = true,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
             };
+            
+            // Đổi màu nền khi click chọn thành màu trắng để không bị xanh lè
+            dgvBug.DefaultCellStyle.SelectionBackColor = Color.White;
+            dgvBug.DefaultCellStyle.SelectionForeColor = Color.Black;
+            
             dgvBug.CellClick += DgvBug_CellClick;
             this.Controls.Add(dgvBug);
         }
@@ -183,7 +188,7 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void BtnCapNhat_Click(object sender, EventArgs e)
         {
-            if (maBugDangChon == -1) { MessageBox.Show("Chọn một lỗi trong bảng bên dưới để cập nhật ný ơi!"); return; }
+            if (maBugDangChon == -1) { MessageBox.Show("Vui lòng chọn một bản ghi lỗi để cập nhật!"); return; }
 
             using (SqlConnection conn = new SqlConnection(strKetNoi))
             {
@@ -209,11 +214,11 @@ namespace QLDuAnPhanMemTinHoc.form
         {
             if (maBugDangChon == -1)
             {
-                MessageBox.Show("Ný phải chọn một dòng lỗi trong bảng bên dưới để xóa nha!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn một dòng lỗi để thực hiện xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            DialogResult hoiNhe = MessageBox.Show("Ný có chắc chắn muốn xóa cái bug này không? Xóa xong là mất tiêu luôn đó!", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult hoiNhe = MessageBox.Show("Bạn có chắc chắn muốn xóa bản ghi lỗi này không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (hoiNhe == DialogResult.Yes)
             {
@@ -310,7 +315,7 @@ namespace QLDuAnPhanMemTinHoc.form
 
             // Sự kiện lưu dữ liệu vào Database
             btnLuu.Click += (s, ev) => {
-                if (string.IsNullOrWhiteSpace(txtTD.Text)) { MessageBox.Show("Ný phải nhập tiêu đề lỗi nha!"); return; }
+                if (string.IsNullOrWhiteSpace(txtTD.Text)) { MessageBox.Show("Vui lòng nhập tiêu đề lỗi!"); return; }
                 if (cboDA.SelectedValue == null) { MessageBox.Show("Chưa có dự án nào để chọn!"); return; }
                 if (cboNXL.SelectedValue == null) { MessageBox.Show("Chưa có nhân viên nào để giao việc!"); return; }
 

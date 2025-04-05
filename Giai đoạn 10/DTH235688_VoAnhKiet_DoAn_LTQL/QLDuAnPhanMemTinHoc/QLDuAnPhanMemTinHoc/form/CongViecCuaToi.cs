@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -9,7 +9,7 @@ namespace QLDuAnPhanMemTinHoc.form
 {
     public partial class CongViecCuaToi : Form
     {
-        private string strKetNoi = @"Data Source=DESKTOP-AH4SISS\SQLEXPRESS;Initial Catalog=QLDA;Integrated Security=True";
+        private string strKetNoi = System.Configuration.ConfigurationManager.ConnectionStrings["QLDAConnection"].ConnectionString;
         private int maNhanVienDangNhap;
         private int maCongViecDangChon = -1;
 
@@ -117,13 +117,16 @@ namespace QLDuAnPhanMemTinHoc.form
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 RowHeadersVisible = false,
                 AllowUserToAddRows = false,
-                ReadOnly = true,
-                Font = new Font("Segoe UI", 10),
-                RowTemplate = { Height = 40 }
+                ReadOnly = true
             };
             dgvCongViec.EnableHeadersVisualStyles = false;
             dgvCongViec.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(44, 62, 80);
             dgvCongViec.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
+            
+            // Đổi màu nền khi click chọn thành màu trắng / xám nhạt để đỡ chói
+            dgvCongViec.DefaultCellStyle.SelectionBackColor = Color.White;
+            dgvCongViec.DefaultCellStyle.SelectionForeColor = Color.Black;
+
             dgvCongViec.CellClick += dgvCongViec_CellClick;
 
             pnlGrid.Controls.Add(dgvCongViec);
@@ -202,7 +205,7 @@ namespace QLDuAnPhanMemTinHoc.form
         {
             if (maCongViecDangChon == -1)
             {
-                MessageBox.Show("Ný ơi, chọn cái task trong bảng trước đã!", "Nhắc nhẹ", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn công việc từ danh sách để thực hiện!", "Nhắc nhở", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -234,7 +237,7 @@ namespace QLDuAnPhanMemTinHoc.form
             // Gọi lại load để cập nhật cả bảng dữ liệu lẫn thẻ thống kê
             LoadDuLieuTuDatabase();
 
-            MessageBox.Show("Xong rồi nha ný! Đã cập nhật tiến độ thành công.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Đã cập nhật tiến độ thành công.", "Hoàn tất", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

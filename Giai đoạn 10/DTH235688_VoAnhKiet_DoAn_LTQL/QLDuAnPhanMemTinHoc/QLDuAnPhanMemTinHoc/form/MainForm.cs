@@ -1,4 +1,4 @@
-﻿using QLDuAnPhanMemTinHoc.Data;
+using QLDuAnPhanMemTinHoc.Data;
 using System;
 using System.Windows.Forms;
 using System.Data.SqlClient;
@@ -25,11 +25,8 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void PhanQuyenGiaoDien()
         {
-            // Chuyển về chữ thường để so sánh cả "true", "1", "false", "0"
-            string role = this.quyenHan.Trim().ToLower();
-
-            // ADMIN: Nếu là "true" (như cái MessageBox hiện ra) HOẶC là "1"
-            if (role == "true" || role == "1")
+            // Giờ so sánh với chữ "Admin" đã được chuẩn hóa từ DangNhap
+            if (this.quyenHan == "Admin")
             {
                 // HIỆN HẾT CHO ADMIN
                 btnNhanVien.Visible = true;
@@ -91,9 +88,7 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void btnPhanCong_Click(object sender, EventArgs e)
         {
-            string role = this.quyenHan.Trim().ToLower();
-
-            if (role == "true" || role == "1") // Nếu là ADMIN
+            if (this.quyenHan == "Admin") // Nếu là ADMIN
             {
                 // Mở form sếp đi giao việc
                 OpenChildForm(new QLDuAnPhanMemTinHoc.form.PhanCongCongViec(this.quyenHan));
@@ -111,9 +106,15 @@ namespace QLDuAnPhanMemTinHoc.form
             OpenChildForm(new CongViecCuaToi(this.idDangNhap));
         }
 
+        private void btnTrangChu_Click(object sender, EventArgs e)
+        {
+            string tenVaiTro = (this.quyenHan == "1" || this.quyenHan.ToLower() == "true") ? "Admin" : "Nhân viên";
+            OpenChildForm(new QLDuAnPhanMemTinHoc.form.TrangChu(tenVaiTro));
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
-            string tenVaiTro = (this.quyenHan == "1") ? "Admin" : "Nhân viên";
+            string tenVaiTro = (this.quyenHan == "1" || this.quyenHan.ToLower() == "true") ? "Admin" : "Nhân viên";
             OpenChildForm(new QLDuAnPhanMemTinHoc.form.TrangChu(tenVaiTro));
            
         }
@@ -121,9 +122,7 @@ namespace QLDuAnPhanMemTinHoc.form
         // --- NÚT QUẢN LÝ LỖI (BUG) ---
         private void btnBug_Click(object sender, EventArgs e)
         {
-            string role = this.quyenHan.Trim().ToLower();
-
-            if (role == "true" || role == "1") // NẾU LÀ ADMIN
+            if (this.quyenHan == "Admin") // NẾU LÀ ADMIN
             {
                 // Admin thì truyền số 0 để xem TẤT CẢ Bug
                 OpenChildForm(new QLDuAnPhanMemTinHoc.form.Bug(0));
@@ -132,6 +131,15 @@ namespace QLDuAnPhanMemTinHoc.form
             {
                 // Nhân viên thì truyền ID của họ (idDangNhap) vào để xem Bug CỦA RIÊNG HỌ
                 OpenChildForm(new QLDuAnPhanMemTinHoc.form.Bug(this.idDangNhap));
+            }
+        }
+
+        private void btnDangXuat_Click(object sender, EventArgs e)
+        {
+            DialogResult dt = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dt == DialogResult.Yes)
+            {
+                Application.Restart();
             }
         }
 

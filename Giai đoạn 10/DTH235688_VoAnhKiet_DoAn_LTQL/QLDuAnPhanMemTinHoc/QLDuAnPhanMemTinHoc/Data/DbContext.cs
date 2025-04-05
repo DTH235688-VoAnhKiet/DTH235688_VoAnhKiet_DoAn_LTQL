@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +16,10 @@ namespace QLDuAnPhanMemTinHoc.Data
         public DbSet<PhanCong> PhanCong { get; set; }
         public DbSet<CongViec> CongViec { get; set; }
         public DbSet<PhanCongCongViec> PhanCongCongViec { get; set; }
-        public DbSet<TienDo> TienDo { get; set; }
         public DbSet<Bug> Bug { get; set; }
-        public DbSet<VaiTro> VaiTro { get; set; }
-        public DbSet<NhanVien_VaiTro> NhanVien_VaiTro { get; set; }
-        public DbSet<TaiLieuDuAn> TaiLieuDuAn { get; set; }
-        public DbSet<NhatKyHoatDong> NhatKyHoatDong { get; set; }
+        public DbSet<TienDo> TienDo { get; set; }
+        public DbSet<PhongBan> PhongBan { get; set; }
+        public DbSet<ChucVu> ChucVu { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -72,7 +70,19 @@ namespace QLDuAnPhanMemTinHoc.Data
                 .HasForeignKey(p => p.DuAnID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<NhanVien>()
+                .HasOne(nv => nv.PhongBanEntity)
+                .WithMany(pb => pb.NhanViens)
+                .HasForeignKey(nv => nv.PhongBanID)
+                .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<NhanVien>()
+                .HasOne(nv => nv.ChucVuEntity)
+                .WithMany(cv => cv.NhanViens)
+                .HasForeignKey(nv => nv.ChucVuID)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

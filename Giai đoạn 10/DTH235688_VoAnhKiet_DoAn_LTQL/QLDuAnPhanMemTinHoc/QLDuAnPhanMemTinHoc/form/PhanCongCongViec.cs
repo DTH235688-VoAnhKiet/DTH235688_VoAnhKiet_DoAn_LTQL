@@ -1,4 +1,4 @@
-﻿using QLDuAnPhanMemTinHoc.Data;
+using QLDuAnPhanMemTinHoc.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,9 +21,61 @@ namespace QLDuAnPhanMemTinHoc.form
         public PhanCongCongViec(string vaiTro)
         {
             InitializeComponent();
+            StylizeForm();
+            dgvPhanCong.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.White;
+            dgvPhanCong.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.Black;
+            
+            // Gắn sự kiện nút Hủy
+            btnHuy.Click += btnHuy_Click;
+
             this.quyenHan = vaiTro;
             LoadData();
             PhanQuyen();
+        }
+
+        private void StylizeForm()
+        {
+            this.BackColor = System.Drawing.Color.FromArgb(245, 246, 250);
+            foreach (Control c in this.Controls)
+            {
+                StylizeControls(c);
+            }
+        }
+
+        private void StylizeControls(Control parent)
+        {
+            if (parent is System.Windows.Forms.Button btn)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+                btn.ForeColor = System.Drawing.Color.White;
+
+                string text = btn.Text.ToLower();
+                if (text.Contains("thêm")) btn.BackColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                else if (text.Contains("sửa") || text.Contains("cập nhật")) btn.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+                else if (text.Contains("xóa")) btn.BackColor = System.Drawing.Color.FromArgb(231, 76, 60);
+                else if (text.Contains("lưu")) btn.BackColor = System.Drawing.Color.FromArgb(243, 156, 18);
+                else if (text.Contains("hủy") || text.Contains("thoát")) btn.BackColor = System.Drawing.Color.FromArgb(149, 165, 166);
+                else if (text.Contains("tìm") || text.Contains("search")) btn.BackColor = System.Drawing.Color.FromArgb(155, 89, 182);
+                else if (text.Contains("excel")) btn.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+                else btn.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            }
+            else if (parent is DataGridView dgv)
+            {
+                dgv.BackgroundColor = System.Drawing.Color.White;
+                dgv.BorderStyle = BorderStyle.None;
+                dgv.EnableHeadersVisualStyles = false;
+                dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+                dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+                dgv.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+                dgv.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+            }
+
+            foreach (Control c in parent.Controls)
+            {
+                StylizeControls(c);
+            }
         }
 
         private void PhanQuyen()
@@ -70,7 +122,7 @@ namespace QLDuAnPhanMemTinHoc.form
 
             // 3. Load nhân viên vào ComboBox
             cboNhanVien.DataSource = db.NhanVien.ToList();
-            cboNhanVien.DisplayMember = "HoTen";
+            cboNhanVien.DisplayMember = "HoVaTen";
             cboNhanVien.ValueMember = "ID";
 
             cboTrangThai.Items.Clear(); // Xóa sạch trước khi thêm để khỏi bị trùng
@@ -102,7 +154,7 @@ namespace QLDuAnPhanMemTinHoc.form
             }
             if (cboDuAn.SelectedValue == null || cboNhanVien.SelectedValue == null)
             {
-                MessageBox.Show("Ný chọn thiếu Dự án hoặc Nhân viên rồi!", "Nhắc nhở");
+                MessageBox.Show("Vui lòng chọn Dự án và Nhân viên!", "Thông báo");
                 return;
             }
 
@@ -143,7 +195,7 @@ namespace QLDuAnPhanMemTinHoc.form
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi rồi ný ơi: " + ex.Message, "Lỗi");
+                MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi");
             }
         }
 
@@ -187,12 +239,12 @@ namespace QLDuAnPhanMemTinHoc.form
             // Kiểm tra xem đã click chọn dòng nào trong bảng chưa
             if (idPhanCongDangChon == -1 || idCongViecDangChon == -1)
             {
-                MessageBox.Show("Ný phải click chọn một dòng trong bảng rồi mới bấm Xóa được nha!", "Nhắc nhở");
+                MessageBox.Show("Vui lòng chọn một dòng trong danh sách để thực hiện xóa!", "Thông báo");
                 return;
             }
 
             // Hỏi lại cho chắc ăn
-            DialogResult dt = MessageBox.Show("Chắc chắn muốn xóa phân công này không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult dt = MessageBox.Show("Bạn có chắc chắn muốn xóa phân công này không?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dt == DialogResult.Yes)
             {
                 try
@@ -226,7 +278,7 @@ namespace QLDuAnPhanMemTinHoc.form
             // Kiểm tra xem đã click chọn dòng nào chưa
             if (idPhanCongDangChon == -1 || idCongViecDangChon == -1)
             {
-                MessageBox.Show("Ný phải click chọn một dòng trong bảng để Sửa nha!", "Nhắc nhở");
+                MessageBox.Show("Vui lòng chọn một bản ghi để sửa!", "Thông báo");
                 return;
             }
 
@@ -300,16 +352,32 @@ namespace QLDuAnPhanMemTinHoc.form
                 dgvPhanCong.Columns["MaPhanCong"].Visible = false;
                 dgvPhanCong.Columns["MaCongViec"].Visible = false;
 
-                // Nếu tìm không ra thằng nào thì báo cho người ta biết
                 if (danhSachTimKiem.Count == 0)
                 {
-                    MessageBox.Show("Tìm đỏ con mắt không thấy ný ơi!", "Thông báo");
+                    MessageBox.Show("Không tìm thấy dữ liệu khớp với từ khóa tìm kiếm!", "Thông báo");
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi tìm kiếm: " + ex.Message, "Lỗi");
             }
+        }
+
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            // Reset toàn bộ form về trạng thái ban đầu
+            txtTenCongViec.Clear();
+            cboDuAn.SelectedIndex = -1;
+            cboNhanVien.SelectedIndex = -1;
+            cboTrangThai.SelectedIndex = -1;
+            dtpStart.Value = DateTime.Now;
+            dtpEnd.Value = DateTime.Now;
+            
+            idPhanCongDangChon = -1;
+            idCongViecDangChon = -1;
+            
+            LoadData();
+            txtTenCongViec.Focus();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,6 +16,37 @@ namespace QLDuAnPhanMemTinHoc.form
         public DangNhap()
         {
             InitializeComponent();
+            StylizeForm();
+        }
+
+        private void StylizeForm()
+        {
+            this.BackColor = System.Drawing.Color.FromArgb(245, 246, 250);
+            foreach (Control c in this.Controls)
+            {
+                StylizeControls(c);
+            }
+        }
+
+        private void StylizeControls(Control parent)
+        {
+            if (parent is System.Windows.Forms.Button btn)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+                btn.ForeColor = System.Drawing.Color.White;
+
+                string text = btn.Text.ToLower();
+                if (text.Contains("đăng nhập")) btn.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+                else if (text.Contains("thoát") || text.Contains("hủy")) btn.BackColor = System.Drawing.Color.FromArgb(149, 165, 166);
+                else btn.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            }
+
+            foreach (Control c in parent.Controls)
+            {
+                StylizeControls(c);
+            }
         }
 
         private void btnDangNhap_Click(object sender, EventArgs e)
@@ -25,22 +56,20 @@ namespace QLDuAnPhanMemTinHoc.form
 
             if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass))
             {
-                MessageBox.Show("Ný ơi, vui lòng nhập đầy đủ tên và mật khẩu nha!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             string vaiTro = "";
-            int idDangNhap = -1; // Biến này cực quan trọng để hứng ID nè
+            int idDangNhap = -1;
 
-            // Dán cái chuỗi kết nối của ný vô đây nha (giống bên form CongViecCuaToi á)
-            string strKetNoi = "Data Source=DESKTOP-AH4SISS\\SQLEXPRESS;Initial Catalog=QLDA;Integrated Security=True";
+            string strKetNoi = System.Configuration.ConfigurationManager.ConnectionStrings["QLDAConnection"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(strKetNoi))
             {
                 try
                 {
                     conn.Open();
-                    // Câu SQL thần thánh: Tìm nhân viên có User và Pass khớp với ný nhập
                     string sql = "SELECT ID, QuyenHan FROM NhanVien WHERE TenDangNhap = @User AND MatKhau = @Pass";
                     using (SqlCommand cmd = new SqlCommand(sql, conn))
                     {
@@ -49,10 +78,10 @@ namespace QLDuAnPhanMemTinHoc.form
 
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            if (reader.Read()) // Nếu đọc được dữ liệu (tức là đăng nhập đúng)
+                            if (reader.Read())
                             {
-                                idDangNhap = Convert.ToInt32(reader["ID"]); // Chộp ngay cái ID
-                                vaiTro = reader["QuyenHan"].ToString();     // Chộp luôn cái quyền
+                                idDangNhap = Convert.ToInt32(reader["ID"]);
+                                vaiTro = reader["QuyenHan"].ToString();
                             }
                         }
                     }
@@ -64,13 +93,15 @@ namespace QLDuAnPhanMemTinHoc.form
                 }
             }
 
-            // Xử lý sau khi check SQL xong
-            if (idDangNhap != -1) // Có ID tức là đăng nhập thành công
+            if (idDangNhap != -1)
             {
-                MessageBox.Show($"Đăng nhập thành công! Chào {vaiTro} nha.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                MessageBox.Show("Dữ liệu quyền ný đang cầm là: " + vaiTro);
-                // MỞ MAINFORM VÀ NÉM CẢ "VAI TRÒ" LẪN "ID" QUA ĐÓ LUÔN
-                MainForm fMain = new MainForm(vaiTro, idDangNhap);
+                // QuyenHan trong DB có thể trả về 'True', '1' cho Admin
+                bool isAdmin = (vaiTro.ToLower() == "true" || vaiTro == "1" || vaiTro.ToLower() == "admin");
+                string roleFinal = isAdmin ? "Admin" : "Nhân viên";
+
+                MessageBox.Show($"Đăng nhập thành công với quyền {roleFinal}!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
+                MainForm fMain = new MainForm(roleFinal, idDangNhap);
 
                 fMain.FormClosed += (s, args) => this.Close();
                 fMain.Show();
@@ -78,7 +109,7 @@ namespace QLDuAnPhanMemTinHoc.form
             }
             else
             {
-                MessageBox.Show("Sai tài khoản hoặc mật khẩu rồi ný!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Tên đăng nhập hoặc mật khẩu không chính xác!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 txtMatKhau.Clear();
                 txtMatKhau.Focus();
             }
@@ -86,7 +117,7 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
-            DialogResult dt = MessageBox.Show("Ný chắc chắn muốn thoát chứ?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult dt = MessageBox.Show("Bạn có chắc chắn muốn thoát ứng dụng?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (dt == DialogResult.Yes)
             {
                 Application.Exit();

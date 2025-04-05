@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml; // Thêm cái này để xài EPPlus
+using OfficeOpenXml; // Thêm cái này để xài EPPlus
 using QLDuAnPhanMemTinHoc.Data;
 using System;
 using System.Data;
@@ -44,17 +44,23 @@ namespace QLDuAnPhanMemTinHoc.form
         private void LoadCards()
         {
             flowPanelThongKe.Controls.Clear();
-            int w = (flowPanelThongKe.Width / 3) - 25;
+            // Chia đều cho 4 thẻ thay vì 3
+            int w = (flowPanelThongKe.Width / 4) - 20;
 
             string tongDA = _context.DuAn.Count().ToString();
             string tongNV = _context.NhanVien.Count().ToString();
-            string taskTre = _context.CongViec.Count(cv => cv.TrangThai.Contains("Trễ")).ToString();
+            string taskTre = _context.CongViec.Count(cv => cv.HanHoanThanh < DateTime.Now && cv.TrangThai != "Hoàn thành" && cv.TrangThai != "Đã hoàn thành").ToString();
+            
+            // Tính tổng chi phí dự án
+            decimal totalCost = _context.DuAn.Sum(da => da.ChiPhi ?? 0);
+            string tongChiPhi = totalCost.ToString("N0") + " VNĐ";
 
             string titleCard1 = (vaiTroHienTai == "Admin") ? "TỔNG DỰ ÁN" : "DỰ ÁN HỆ THỐNG";
 
             AddProStatCard(titleCard1, tongDA, Color.FromArgb(52, 152, 219), "📁", w);
             AddProStatCard("NHÂN VIÊN", tongNV, Color.FromArgb(46, 204, 113), "👥", w);
             AddProStatCard("TASK TRỄ", taskTre, Color.FromArgb(231, 76, 60), "⚠️", w);
+            AddProStatCard("TỔNG CHI PHÍ", tongChiPhi, Color.FromArgb(155, 89, 182), "", w);
         }
 
         private void AddProStatCard(string title, string count, Color color, string icon, int cardWidth)
@@ -66,10 +72,15 @@ namespace QLDuAnPhanMemTinHoc.form
                 Margin = new Padding(0, 0, 15, 0)
             };
 
+            int fontSize = 35;
+            if (count.Length > 15) fontSize = 18;
+            else if (count.Length > 10) fontSize = 24;
+            else if (count.Length > 6) fontSize = 28;
+
             Label lblNum = new Label
             {
                 Text = count,
-                Font = new Font("Segoe UI", 35, FontStyle.Bold),
+                Font = new Font("Segoe UI", fontSize, FontStyle.Bold),
                 ForeColor = Color.White,
                 Location = new Point(15, 10),
                 AutoSize = true
@@ -105,10 +116,13 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void TaoGiaoDienNangCao()
         {
-            // Tọa độ Y = 390 để đẩy khung trắng xích xuống dưới cho thoáng
+            this.AutoScroll = true; // Cho phép cuộn chuột nếu nội dung dài quá
+
+            // Tọa độ Y = 320 để đẩy khung trắng xích lên cho gần các thẻ hơn
+
             Panel pnlBottom = new Panel
             {
-                Location = new Point(30, 390),
+                Location = new Point(30, 320),
                 Size = new Size(this.ClientSize.Width - 60, 450),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 BackColor = Color.White
@@ -167,6 +181,60 @@ namespace QLDuAnPhanMemTinHoc.form
                 TaoTienDoItem(pnlBottom, da.TenDuAn, tienDo, 450, startY, pbWidth);
 
                 startY += 70; // Giữ khoảng cách chuẩn để không đè nhau
+            }
+
+            // --- PHẦN CẢNH BÁO VIỆC GẤP ---
+            Panel pnlUrgent = new Panel
+            {
+                Location = new Point(30, pnlBottom.Bottom + 20),
+                Size = new Size(this.ClientSize.Width - 60, 200),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                BackColor = Color.White
+            };
+            pnlUrgent.Region = Region.FromHrgn(CreateRoundRectRgn(0, 0, pnlUrgent.Width, pnlUrgent.Height, 15, 15));
+            this.Controls.Add(pnlUrgent);
+
+            Label lblUrgent = new Label
+            {
+                Text = "⚠️ LỊCH TRÌNH & CẢNH BÁO VIỆC GẤP (Dành cho 48h tới)",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Location = new Point(20, 15),
+                ForeColor = Color.FromArgb(231, 76, 60),
+                AutoSize = true
+            };
+            pnlUrgent.Controls.Add(lblUrgent);
+
+            DateTime nearDeadline = DateTime.Now.AddDays(2);
+            var urgentTasks = _context.CongViec
+                                      .Where(c => c.TrangThai != "Hoàn thành" && c.TrangThai != "Đã hoàn thành" && c.HanHoanThanh != null && c.HanHoanThanh <= nearDeadline)
+                                      .OrderBy(c => c.HanHoanThanh)
+                                      .Take(5)
+                                      .ToList();
+
+            int urgentY = 55;
+            if (urgentTasks.Count == 0)
+            {
+                Label lblNoTask = new Label { Text = "Tuyệt vời! Không có công việc nào bị trễ hạn hay phải chạy KPI cả.", Location = new Point(20, urgentY), AutoSize = true, Font = new Font("Segoe UI", 10), ForeColor = Color.FromArgb(46, 204, 113) };
+                pnlUrgent.Controls.Add(lblNoTask);
+            }
+            else
+            {
+                foreach (var t in urgentTasks)
+                {
+                    string status = (t.HanHoanThanh < DateTime.Now) ? "TRỄ HẠN" : "SẮP TỚI HẠN";
+                    string timeStr = t.HanHoanThanh.HasValue ? t.HanHoanThanh.Value.ToString("dd/MM/yyyy HH:mm") : "Không rõ hạn";
+                    
+                    Label item = new Label
+                    {
+                        Text = $"● [{status}] {t.TenCongViec} (Hạn cuối: {timeStr})",
+                        Location = new Point(20, urgentY),
+                        AutoSize = true,
+                        Font = new Font("Segoe UI", 10, (status == "TRỄ HẠN" ? FontStyle.Bold : FontStyle.Regular)),
+                        ForeColor = (status == "TRỄ HẠN" ? Color.Red : Color.DarkOrange)
+                    };
+                    pnlUrgent.Controls.Add(item);
+                    urgentY += 28;
+                }
             }
         }
 
@@ -255,7 +323,7 @@ namespace QLDuAnPhanMemTinHoc.form
                         ws.Cells["B8"].Value = _context.NhanVien.Count();
 
                         ws.Cells["A9"].Value = "Số Task đang trễ:";
-                        ws.Cells["B9"].Value = _context.CongViec.Count(cv => cv.TrangThai.Contains("Trễ"));
+                        ws.Cells["B9"].Value = _context.CongViec.Count(cv => cv.HanHoanThanh < DateTime.Now && cv.TrangThai != "Hoàn thành" && cv.TrangThai != "Đã hoàn thành");
 
                         // 3. CHI TIẾT DỰ ÁN
                         ws.Cells["A11"].Value = "2. DANH SÁCH CHI TIẾT DỰ ÁN";

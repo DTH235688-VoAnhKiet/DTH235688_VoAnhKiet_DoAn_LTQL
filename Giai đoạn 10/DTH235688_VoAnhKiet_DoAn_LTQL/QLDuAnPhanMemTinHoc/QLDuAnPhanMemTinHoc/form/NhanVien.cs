@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Data;
 using System.Linq;
@@ -10,12 +10,72 @@ namespace QLDuAnPhanMemTinHoc.form
     {
         private Data.QLDADbContext _context = new Data.QLDADbContext();
         private bool isThem = false;
+        private int idNhanVienDangChon = -1; // Lưu ID thực tế trong cơ sở dữ liệu
 
         public NhanVien()
         {
             InitializeComponent();
+            dgvNhanVien.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.White;
+            dgvNhanVien.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.Black;
+            
+            // Lưu ý: Tên bảng trong DbSet phải khớp với code bên dưới
+            btnThemMoi.Click += btnThemMoi_Click_1;
+            btnSua.Click += btnSua_Click_1;
+            btnXoa.Click += btnXoa_Click_1;
+            btnLuu.Click += btnLuu_Click_1;
+            btnHuyBo.Click += btnHuyBo_Click_1;
+            btnThoat.Click += btnThoat_Click_1;
+            btnTimKiem.Click += btnTimKiem_Click;
+            dgvNhanVien.CellClick += dgvNhanVien_CellClick_1;
+
+            StylizeForm();
             LoadDataGrid();
-            SetStatus(false);
+            SetStatus(true); // Luôn mở khóa 
+        }
+
+        private void StylizeForm()
+        {
+            this.BackColor = System.Drawing.Color.FromArgb(245, 246, 250);
+            foreach (Control c in this.Controls)
+            {
+                StylizeControls(c);
+            }
+        }
+
+        private void StylizeControls(Control parent)
+        {
+            if (parent is System.Windows.Forms.Button btn)
+            {
+                btn.FlatStyle = FlatStyle.Flat;
+                btn.FlatAppearance.BorderSize = 0;
+                btn.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+                btn.ForeColor = System.Drawing.Color.White;
+
+                string text = btn.Text.ToLower();
+                if (text.Contains("thêm")) btn.BackColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                else if (text.Contains("sửa") || text.Contains("cập nhật")) btn.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
+                else if (text.Contains("xóa")) btn.BackColor = System.Drawing.Color.FromArgb(231, 76, 60);
+                else if (text.Contains("lưu")) btn.BackColor = System.Drawing.Color.FromArgb(243, 156, 18);
+                else if (text.Contains("hủy") || text.Contains("thoát")) btn.BackColor = System.Drawing.Color.FromArgb(149, 165, 166);
+                else if (text.Contains("tìm") || text.Contains("search")) btn.BackColor = System.Drawing.Color.FromArgb(155, 89, 182);
+                else if (text.Contains("excel")) btn.BackColor = System.Drawing.Color.FromArgb(39, 174, 96);
+                else btn.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+            }
+            else if (parent is DataGridView dgv)
+            {
+                dgv.BackgroundColor = System.Drawing.Color.White;
+                dgv.BorderStyle = BorderStyle.None;
+                dgv.EnableHeadersVisualStyles = false;
+                dgv.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+                dgv.ColumnHeadersDefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(41, 128, 185);
+                dgv.ColumnHeadersDefaultCellStyle.ForeColor = System.Drawing.Color.White;
+                dgv.ColumnHeadersDefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+            }
+
+            foreach (Control c in parent.Controls)
+            {
+                StylizeControls(c);
+            }
         }
 
         private void LoadDataGrid()
@@ -25,7 +85,8 @@ namespace QLDuAnPhanMemTinHoc.form
                 _context = new Data.QLDADbContext();
                 var data = _context.NhanVien.Select(nv => new
                 {
-                    nv.ID,
+                    ID_Goc = nv.ID, 
+                    MaNV = nv.MaNhanVien ?? "Chưa có",
                     nv.HoVaTen,
                     nv.DienThoai,
                     nv.Email,
@@ -35,11 +96,13 @@ namespace QLDuAnPhanMemTinHoc.form
                     nv.PhongBan,
                     nv.NgaySinh,
                     nv.TenDangNhap,
-                    nv.QuyenHan, // Trong DB cái này là bool
+                    nv.QuyenHan,
                     nv.GhiChu
                 }).ToList();
 
                 dgvNhanVien.DataSource = data;
+                
+                if (dgvNhanVien.Columns["ID_Goc"] != null) dgvNhanVien.Columns["ID_Goc"].Visible = false;
             }
             catch (Exception ex)
             {
@@ -49,27 +112,28 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void SetStatus(bool editing)
         {
-            // Cho tất cả hiện lên luôn, không quan tâm biến editing nữa
-            txtHoTen.Enabled = true;
-            txtEmail.Enabled = true;
-            txtSDT.Enabled = true;
-            txtTenDangNhap.Enabled = true;
-            txtMatKhau.Enabled = true;
-            cboGioiTinh.Enabled = true;
-            cboPhongBan.Enabled = true;
-            cboChucVu.Enabled = true;
-            cboTrangThai.Enabled = true;
-            cboQuyenHan.Enabled = true;
-            dtpNgaySinh.Enabled = true;
-            txtGhiChu.Enabled = true;
+            // Chỉ mở khóa các ô nhập liệu khi đang trong chế độ Thêm hoặc Sửa
+            txtHoTen.Enabled = editing;
+            txtEmail.Enabled = editing;
+            txtSDT.Enabled = editing;
+            txtTenDangNhap.Enabled = editing;
+            txtMatKhau.Enabled = editing;
+            cboGioiTinh.Enabled = editing;
+            cboPhongBan.Enabled = editing;
+            cboChucVu.Enabled = editing;
+            cboTrangThai.Enabled = editing;
+            cboQuyenHan.Enabled = editing;
+            dtpNgaySinh.Enabled = editing;
+            txtGhiChu.Enabled = editing;
 
-            // Các nút bấm cũng cho hiện hết luôn
-            btnLuu.Enabled = true;
-            btnHuyBo.Enabled = true;
-            btnThemMoi.Enabled = true;
-            btnSua.Enabled = true;
-            btnXoa.Enabled = true;
-            btnThoat.Enabled = true;
+            // Nút Lưu và Hủy chỉ hiện khi đang sửa
+            btnLuu.Enabled = editing;
+            btnHuyBo.Enabled = editing;
+
+            // Các nút chức năng chính
+            btnThemMoi.Enabled = !editing;
+            btnSua.Enabled = !editing;
+            btnXoa.Enabled = !editing;
         }
 
         private void ClearForm()
@@ -82,49 +146,46 @@ namespace QLDuAnPhanMemTinHoc.form
             txtMatKhau.Text = "";
             txtGhiChu.Text = "";
 
-            // Reset các ComboBox về dòng đầu tiên hoặc trống
+            // 1. Lấy từ khóa tìm kiếm, chuẩn hóa chuỗi để tìm chính xác hơn
             cboGioiTinh.SelectedIndex = -1;
             cboPhongBan.SelectedIndex = -1;
             cboChucVu.SelectedIndex = -1;
             cboTrangThai.SelectedIndex = -1;
             cboQuyenHan.SelectedIndex = -1;
 
-            // Reset ngày tháng về ngày hiện tại
             dtpNgaySinh.Value = DateTime.Now;
 
-            // Đưa con trỏ chuột về ô Họ tên để bắt đầu nhập luôn
             txtHoTen.Focus();
         }
 
         private void btnThemMoi_Click(object sender, EventArgs e)
         {
-
+            btnThemMoi_Click_1(sender, e);
         }
 
         private void btnSua_Click(object sender, EventArgs e)
         {
-
+            btnSua_Click_1(sender, e);
         }
 
         private void btnHuyBo_Click(object sender, EventArgs e)
         {
-
+            btnHuyBo_Click_1(sender, e);
         }
 
-        // --- ĐÂY LÀ CHỖ QUAN TRỌNG NÈ NÝ ---
         private void btnLuu_Click(object sender, EventArgs e)
         {
-
+            btnLuu_Click_1(sender, e);
         }
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-
+            btnXoa_Click_1(sender, e);
         }
 
         private void dgvNhanVien_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            
+            dgvNhanVien_CellClick_1(sender, e);
         }
 
         private void btnTimKiem_Click(object sender, EventArgs e)
@@ -138,14 +199,31 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void btnThoat_Click(object sender, EventArgs e)
         {
-            this.Close();
+            if (MessageBox.Show("Bạn có chắc chắn muốn thoát khỏi form Quản lý nhân viên?", "Xác nhận thoát", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                this.Close();
+            }
         }
 
         private void btnLuu_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtHoTen.Text))
             {
-                MessageBox.Show("Nhập họ tên ný ơi!");
+                MessageBox.Show("Vui lòng nhập họ tên nhân viên!");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(txtSDT.Text) && !System.Text.RegularExpressions.Regex.IsMatch(txtSDT.Text, @"^0\d{9}$"))
+            {
+                MessageBox.Show("Số điện thoại không hợp lệ! (Phải có 10 chữ số và bắt đầu bằng số 0)", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSDT.Focus();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(txtEmail.Text) && !System.Text.RegularExpressions.Regex.IsMatch(txtEmail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                MessageBox.Show("Email không hợp lệ! (Ví dụ: abc@gmail.com)", "Lỗi dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtEmail.Focus();
                 return;
             }
 
@@ -153,27 +231,42 @@ namespace QLDuAnPhanMemTinHoc.form
             {
                 if (isThem) // --- CHẾ ĐỘ THÊM MỚI ---
                 {
+                    // Cập nhật lại thông tin bảng CongViec từ dữ liệu trên Form
+                    int nextID = 1;
+                    if (_context.NhanVien.Any())
+                    {
+                        nextID = _context.NhanVien.Max(x => x.ID) + 1;
+                    }
+                    string maMoi = "NV" + nextID.ToString("D3");
+
                     var nvMoi = new Data.NhanVien()
                     {
+                        MaNhanVien = maMoi,
                         HoVaTen = txtHoTen.Text,
                         DienThoai = txtSDT.Text,
                         Email = txtEmail.Text,
                         TenDangNhap = txtTenDangNhap.Text,
                         MatKhau = txtMatKhau.Text,
                         GioiTinh = cboGioiTinh.Text,
+                        // Cập nhật lại thông tin bảng PhanCongCongViec (Nếu thay đổi Nhân viên)
                         PhongBan = cboPhongBan.Text,
                         ChucVu = cboChucVu.Text,
                         TrangThai = cboTrangThai.Text,
                         NgaySinh = dtpNgaySinh.Value,
                         GhiChu = txtGhiChu.Text,
-                        QuyenHan = (cboQuyenHan.Text == "Admin") // Sửa lỗi ép kiểu
+                        QuyenHan = (cboQuyenHan.Text == "Admin")
                     };
                     _context.NhanVien.Add(nvMoi);
                 }
                 else // --- CHẾ ĐỘ SỬA ---
                 {
-                    int id = int.Parse(txtMaNV.Text);
-                    var nvSua = _context.NhanVien.Find(id);
+                    if (idNhanVienDangChon == -1)
+                    {
+                        MessageBox.Show("Vui lòng chọn một nhân viên để thực hiện thay đổi!");
+                        return;
+                    }
+
+                    var nvSua = _context.NhanVien.Find(idNhanVienDangChon);
                     if (nvSua != null)
                     {
                         nvSua.HoVaTen = txtHoTen.Text;
@@ -191,10 +284,10 @@ namespace QLDuAnPhanMemTinHoc.form
                     }
                 }
 
-                _context.SaveChanges(); // Chốt hạ lưu vào Database
-                MessageBox.Show("Lưu thành công rồi nha!");
-                LoadDataGrid(); // Load lại bảng
-                SetStatus(false); // Lưu xong thì khóa lại cho an toàn
+                _context.SaveChanges(); 
+                MessageBox.Show("Dữ liệu đã được lưu thành công.");
+                LoadDataGrid(); 
+                SetStatus(false); 
             }
             catch (Exception ex)
             {
@@ -204,23 +297,32 @@ namespace QLDuAnPhanMemTinHoc.form
 
         private void btnXoa_Click_1(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(txtMaNV.Text))
+            if (idNhanVienDangChon == -1)
             {
-                MessageBox.Show("Chọn nhân viên muốn xóa đã ný!");
+                MessageBox.Show("Vui lòng chọn nhân viên muốn xóa từ danh sách!");
                 return;
             }
 
-            if (MessageBox.Show("Ný có chắc muốn xóa người này không?", "Xác nhận", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Bạn có chắc chắn muốn xóa nhân viên này? Dữ liệu đã xóa sẽ không thể khôi phục.", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                int id = int.Parse(txtMaNV.Text);
-                var nv = _context.NhanVien.Find(id);
-                if (nv != null)
+                try
                 {
-                    _context.NhanVien.Remove(nv);
-                    _context.SaveChanges();
-                    LoadDataGrid(); // Load lại bảng sau khi xóa
-                    ClearForm();    // Xóa trắng form
-                    MessageBox.Show("Xóa xong rồi nha!");
+                    var nv = _context.NhanVien.Find(idNhanVienDangChon);
+                    if (nv != null)
+                    {
+                        _context.NhanVien.Remove(nv);
+                        _context.SaveChanges();
+                        
+                        LoadDataGrid(); 
+                        ClearForm();    
+                        idNhanVienDangChon = -1;
+                        MessageBox.Show("Đã xóa nhân viên thành công.");
+                    }
+                }
+                catch (Exception)
+                {
+                    // Lỗi này thường do vướng Khóa ngoại (Foreign Key)
+                    MessageBox.Show("Không thể xóa nhân viên này vì họ đang có dữ liệu liên quan (Dự án, Công việc hoặc Bug).\n\nGợi ý: Bạn nên chuyển Trạng thái của nhân viên sang 'Đã nghỉ việc' thay vì xóa hoàn toàn để giữ lại lịch sử hệ thống.", "Lỗi ràng buộc dữ liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -228,17 +330,17 @@ namespace QLDuAnPhanMemTinHoc.form
         private void btnSua_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtMaNV.Text)) return;
-            isThem = false; // Đánh dấu là đang sửa chứ không phải thêm mới
-            SetStatus(true); // Mở khóa các ô TextBox, ComboBox để nhập
+            isThem = false; 
+            SetStatus(true); 
             txtHoTen.Focus();
         }
 
         private void btnThemMoi_Click_1(object sender, EventArgs e)
         {
-            isThem = true; // Đánh dấu là đang thêm mới
-            ClearForm();   // Xóa trắng các ô nhập liệu
-            SetStatus(true); // Mở khóa các ô để ný nhập
-            txtMaNV.Text = string.Empty; // Mã NV để trống vì DB tự tăng
+            isThem = true; 
+            ClearForm();   
+            SetStatus(true); 
+            txtMaNV.Text = string.Empty; 
             txtHoTen.Focus();
         }
 
@@ -258,8 +360,11 @@ namespace QLDuAnPhanMemTinHoc.form
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dgvNhanVien.Rows[e.RowIndex];
-                // Đổ dữ liệu lên các ô
-                txtMaNV.Text = row.Cells["ID"].Value?.ToString();
+                // Lấy ID gốc để làm việc dưới nền
+                idNhanVienDangChon = int.Parse(row.Cells["ID_Goc"].Value?.ToString() ?? "-1");
+
+                // Sử dụng TextBox tìm kiếm tương ứng trên form
+                txtMaNV.Text = row.Cells["MaNV"].Value?.ToString();
                 txtHoTen.Text = row.Cells["HoVaTen"].Value?.ToString();
                 txtSDT.Text = row.Cells["DienThoai"].Value?.ToString();
                 txtEmail.Text = row.Cells["Email"].Value?.ToString();

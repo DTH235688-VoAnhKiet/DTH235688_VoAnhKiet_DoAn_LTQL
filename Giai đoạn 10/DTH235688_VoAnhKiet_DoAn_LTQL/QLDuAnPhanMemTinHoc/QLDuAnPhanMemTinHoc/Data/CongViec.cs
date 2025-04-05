@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +21,6 @@ namespace QLDuAnPhanMemTinHoc.Data
 
         public virtual DuAn DuAn { get; set; } = null!;
         public virtual ObservableCollectionListSource<PhanCongCongViec> PhanCongCongViec { get; } = new();
-        public virtual ObservableCollectionListSource<TienDo> TienDo { get; } = new();
+        public virtual ObservableCollectionListSource<TienDo> TienDos { get; } = new();
     }
 }

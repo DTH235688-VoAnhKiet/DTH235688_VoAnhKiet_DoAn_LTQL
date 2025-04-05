@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLDuAnPhanMemTinHoc.Data;
 
@@ -11,9 +12,11 @@ using QLDuAnPhanMemTinHoc.Data;
 namespace QLDuAnPhanMemTinHoc.Migrations
 {
     [DbContext(typeof(QLDADbContext))]
-    partial class QLDADbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414194556_AddMaNV_MaDA_Final")]
+    partial class AddMaNV_MaDA_Final
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,6 +242,53 @@ namespace QLDuAnPhanMemTinHoc.Migrations
                     b.ToTable("NhanVien");
                 });
 
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.NhanVien_VaiTro", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("NhanVienID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VaiTroID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("NhanVienID");
+
+                    b.HasIndex("VaiTroID");
+
+                    b.ToTable("NhanVien_VaiTro");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.NhatKyHoatDong", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("MoTaHoatDong")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NhanVienID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ThoiGian")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("NhanVienID");
+
+                    b.ToTable("NhatKyHoatDong");
+                });
+
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.PhanCong", b =>
                 {
                     b.Property<int>("ID")
@@ -298,6 +348,78 @@ namespace QLDuAnPhanMemTinHoc.Migrations
                     b.ToTable("PhanCongCongViec");
                 });
 
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.TaiLieuDuAn", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("DuAnID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DuongDan")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NgayTaiLen")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TenTaiLieu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("DuAnID");
+
+                    b.ToTable("TaiLieuDuAn");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.TienDo", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CongViecID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PhanTram")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CongViecID");
+
+                    b.ToTable("TienDo");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.VaiTro", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("TenVaiTro")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("VaiTro");
+                });
+
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.Bug", b =>
                 {
                     b.HasOne("QLDuAnPhanMemTinHoc.Data.DuAn", "DuAn")
@@ -354,6 +476,36 @@ namespace QLDuAnPhanMemTinHoc.Migrations
                     b.Navigation("QuanLy");
                 });
 
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.NhanVien_VaiTro", b =>
+                {
+                    b.HasOne("QLDuAnPhanMemTinHoc.Data.NhanVien", "NhanVien")
+                        .WithMany("NhanVien_VaiTro")
+                        .HasForeignKey("NhanVienID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QLDuAnPhanMemTinHoc.Data.VaiTro", "VaiTro")
+                        .WithMany("NhanVien_VaiTro")
+                        .HasForeignKey("VaiTroID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NhanVien");
+
+                    b.Navigation("VaiTro");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.NhatKyHoatDong", b =>
+                {
+                    b.HasOne("QLDuAnPhanMemTinHoc.Data.NhanVien", "NhanVien")
+                        .WithMany("NhatKyHoatDong")
+                        .HasForeignKey("NhanVienID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NhanVien");
+                });
+
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.PhanCong", b =>
                 {
                     b.HasOne("QLDuAnPhanMemTinHoc.Data.DuAn", "DuAn")
@@ -400,9 +552,33 @@ namespace QLDuAnPhanMemTinHoc.Migrations
                     b.Navigation("NhanVien");
                 });
 
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.TaiLieuDuAn", b =>
+                {
+                    b.HasOne("QLDuAnPhanMemTinHoc.Data.DuAn", "DuAn")
+                        .WithMany("TaiLieuDuAn")
+                        .HasForeignKey("DuAnID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DuAn");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.TienDo", b =>
+                {
+                    b.HasOne("QLDuAnPhanMemTinHoc.Data.CongViec", "CongViec")
+                        .WithMany("TienDo")
+                        .HasForeignKey("CongViecID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CongViec");
+                });
+
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.CongViec", b =>
                 {
                     b.Navigation("PhanCongCongViec");
+
+                    b.Navigation("TienDo");
                 });
 
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.DuAn", b =>
@@ -414,6 +590,8 @@ namespace QLDuAnPhanMemTinHoc.Migrations
                     b.Navigation("PhanCong");
 
                     b.Navigation("PhanCongs");
+
+                    b.Navigation("TaiLieuDuAn");
                 });
 
             modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.KhachHang", b =>
@@ -429,11 +607,20 @@ namespace QLDuAnPhanMemTinHoc.Migrations
 
                     b.Navigation("DuAnQuanLy");
 
+                    b.Navigation("NhanVien_VaiTro");
+
+                    b.Navigation("NhatKyHoatDong");
+
                     b.Navigation("PhanCong");
 
                     b.Navigation("PhanCongCongViec");
 
                     b.Navigation("PhanCongs");
+                });
+
+            modelBuilder.Entity("QLDuAnPhanMemTinHoc.Data.VaiTro", b =>
+                {
+                    b.Navigation("NhanVien_VaiTro");
                 });
 #pragma warning restore 612, 618
         }

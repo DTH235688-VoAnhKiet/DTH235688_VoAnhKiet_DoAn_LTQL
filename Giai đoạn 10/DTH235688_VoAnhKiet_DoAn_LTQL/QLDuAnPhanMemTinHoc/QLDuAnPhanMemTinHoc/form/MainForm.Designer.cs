@@ -1,4 +1,4 @@
-﻿namespace QLDuAnPhanMemTinHoc.form
+namespace QLDuAnPhanMemTinHoc.form
 {
     partial class MainForm
     {
@@ -23,6 +23,8 @@
             btnKhachHang = new Button();
             btnDuAn = new Button();
             btnNhanVien = new Button();
+            btnTrangChu = new Button();
+            btnDangXuat = new Button();
             panelLogo = new Panel();
             lblLogo = new Label();
             panelDesktop = new Panel();
@@ -38,7 +40,9 @@
             panelMenu.Controls.Add(btnKhachHang);
             panelMenu.Controls.Add(btnDuAn);
             panelMenu.Controls.Add(btnNhanVien);
+            panelMenu.Controls.Add(btnTrangChu);
             panelMenu.Controls.Add(panelLogo);
+            panelMenu.Controls.Add(btnDangXuat);
             panelMenu.Dock = DockStyle.Left;
             panelMenu.Location = new Point(0, 0);
             panelMenu.Name = "panelMenu";
@@ -53,7 +57,7 @@
             btnBug.Font = new Font("Segoe UI", 11F);
             btnBug.ForeColor = Color.Gainsboro;
             btnBug.ImageAlign = ContentAlignment.MiddleLeft;
-            btnBug.Location = new Point(0, 320);
+            btnBug.Location = new Point(0, 380);
             btnBug.Name = "btnBug";
             btnBug.Padding = new Padding(12, 0, 0, 0);
             btnBug.Size = new Size(250, 60);
@@ -72,7 +76,7 @@
             btnPhanCong.Font = new Font("Segoe UI", 11F);
             btnPhanCong.ForeColor = Color.Gainsboro;
             btnPhanCong.ImageAlign = ContentAlignment.MiddleLeft;
-            btnPhanCong.Location = new Point(0, 260);
+            btnPhanCong.Location = new Point(0, 320);
             btnPhanCong.Name = "btnPhanCong";
             btnPhanCong.Padding = new Padding(12, 0, 0, 0);
             btnPhanCong.Size = new Size(250, 60);
@@ -91,7 +95,7 @@
             btnKhachHang.Font = new Font("Segoe UI", 11F);
             btnKhachHang.ForeColor = Color.Gainsboro;
             btnKhachHang.ImageAlign = ContentAlignment.MiddleLeft;
-            btnKhachHang.Location = new Point(0, 200);
+            btnKhachHang.Location = new Point(0, 260);
             btnKhachHang.Name = "btnKhachHang";
             btnKhachHang.Padding = new Padding(12, 0, 0, 0);
             btnKhachHang.Size = new Size(250, 60);
@@ -110,7 +114,7 @@
             btnDuAn.Font = new Font("Segoe UI", 11F);
             btnDuAn.ForeColor = Color.Gainsboro;
             btnDuAn.ImageAlign = ContentAlignment.MiddleLeft;
-            btnDuAn.Location = new Point(0, 140);
+            btnDuAn.Location = new Point(0, 200);
             btnDuAn.Name = "btnDuAn";
             btnDuAn.Padding = new Padding(12, 0, 0, 0);
             btnDuAn.Size = new Size(250, 60);
@@ -129,7 +133,7 @@
             btnNhanVien.Font = new Font("Segoe UI", 11F);
             btnNhanVien.ForeColor = Color.Gainsboro;
             btnNhanVien.ImageAlign = ContentAlignment.MiddleLeft;
-            btnNhanVien.Location = new Point(0, 80);
+            btnNhanVien.Location = new Point(0, 140);
             btnNhanVien.Name = "btnNhanVien";
             btnNhanVien.Padding = new Padding(12, 0, 0, 0);
             btnNhanVien.Size = new Size(250, 60);
@@ -139,6 +143,44 @@
             btnNhanVien.TextImageRelation = TextImageRelation.ImageBeforeText;
             btnNhanVien.UseVisualStyleBackColor = true;
             btnNhanVien.Click += btnNhanVien_Click;
+            // 
+            // btnTrangChu
+            // 
+            btnTrangChu.Dock = DockStyle.Top;
+            btnTrangChu.FlatAppearance.BorderSize = 0;
+            btnTrangChu.FlatStyle = FlatStyle.Flat;
+            btnTrangChu.Font = new Font("Segoe UI", 11F);
+            btnTrangChu.ForeColor = Color.Gainsboro;
+            btnTrangChu.ImageAlign = ContentAlignment.MiddleLeft;
+            btnTrangChu.Location = new Point(0, 80);
+            btnTrangChu.Name = "btnTrangChu";
+            btnTrangChu.Padding = new Padding(12, 0, 0, 0);
+            btnTrangChu.Size = new Size(250, 60);
+            btnTrangChu.TabIndex = 6;
+            btnTrangChu.Text = "  🏠 Trang chủ";
+            btnTrangChu.TextAlign = ContentAlignment.MiddleLeft;
+            btnTrangChu.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnTrangChu.UseVisualStyleBackColor = true;
+            btnTrangChu.Click += btnTrangChu_Click;
+            // 
+            // btnDangXuat
+            // 
+            btnDangXuat.Dock = DockStyle.Bottom;
+            btnDangXuat.FlatAppearance.BorderSize = 0;
+            btnDangXuat.FlatStyle = FlatStyle.Flat;
+            btnDangXuat.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btnDangXuat.ForeColor = Color.Tomato;
+            btnDangXuat.ImageAlign = ContentAlignment.MiddleLeft;
+            btnDangXuat.Location = new Point(0, 529);
+            btnDangXuat.Name = "btnDangXuat";
+            btnDangXuat.Padding = new Padding(12, 0, 0, 0);
+            btnDangXuat.Size = new Size(250, 60);
+            btnDangXuat.TabIndex = 7;
+            btnDangXuat.Text = "  🚪 Đăng xuất";
+            btnDangXuat.TextAlign = ContentAlignment.MiddleLeft;
+            btnDangXuat.TextImageRelation = TextImageRelation.ImageBeforeText;
+            btnDangXuat.UseVisualStyleBackColor = true;
+            btnDangXuat.Click += btnDangXuat_Click;
             // 
             // panelLogo
             // 
@@ -196,6 +238,8 @@
         internal Button btnKhachHang;
         internal Button btnDuAn;
         internal Button btnNhanVien;
+        internal Button btnTrangChu;
+        internal Button btnDangXuat;
         internal Button btnPhanCong;
         internal Button btnBug; // Đã nằm đây rồi nhé ný!
     }

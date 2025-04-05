@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLDuAnPhanMemTinHoc.Data;
 
@@ -11,9 +12,11 @@ using QLDuAnPhanMemTinHoc.Data;
 namespace QLDuAnPhanMemTinHoc.Migrations
 {
     [DbContext(typeof(QLDADbContext))]
-    partial class QLDADbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415045057_CleanupUnusedTables")]
+    partial class CleanupUnusedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
